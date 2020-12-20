@@ -10576,15 +10576,17 @@ which should be used and reported to the user."
 
 (defun flycheck-pylint-find-project-root (_checker)
   "Find the directory to invoke pylint from.
-
-The algorithm is the same as used by epylint: find the first
-directory that doesn't have a __init__.py file."
+It finds the first directory above the current one containing
+a .pylintrc file, or a file pointing to it being a Python project."
   (locate-dominating-file
    (if buffer-file-name
        (file-name-directory buffer-file-name)
      default-directory)
    (lambda (dir)
-     (not (file-exists-p (expand-file-name "__init__.py" dir))))))
+     (or (file-exists-p (expand-file-name "setup.py" dir))
+         (file-exists-p (expand-file-name "pyproject.toml" dir))
+         (file-exists-p (expand-file-name ".git" dir))
+         (file-exists-p (expand-file-name ".pylintrc" dir))))))
 
 (flycheck-define-checker python-pylint
   "A Python syntax and style checker using Pylint.
